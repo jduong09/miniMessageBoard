@@ -1,6 +1,4 @@
 const express = require('express');
-const fs = require('fs');
-const pug = require('pug');
 
 const app = express();
 const port = 3000;
@@ -30,7 +28,6 @@ app.get('/new', (req, res) => {
 });
 
 app.post('/new', (req, res) => {
-  console.log(req.body);
   messages.push({ 
     text: req.body.message,
     user: req.body.user,
