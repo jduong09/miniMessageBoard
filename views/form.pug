@@ -1,0 +1,16 @@
+html
+  head
+    meta(charset= 'UTF-8')
+    meta(
+      name= 'viewport'
+      content= 'width=device-width, initial-scale=1.0'
+      )
+    title= title
+  body
+    h1= headerOne
+    form(id= 'form-message-new' method= 'POST' action= '/new')
+      label(for= 'input-message')= 'Message: '
+        input(type= 'text' id= 'input-message' name='message' placeholder='Hello!')
+      label(for= 'input-user')= 'User: '
+        input(type= 'text' id= 'input-user' name='user' placeholder='Shakespeare')
+      input(type= 'submit' id= 'input-submit' value='Add Message')

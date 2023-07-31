@@ -1,13 +1,14 @@
 const express = require('express');
 const fs = require('fs');
+const pug = require('pug');
 
 const app = express();
 const port = 3000;
 
-const message = [
+const messages = [
   {
     text: "Hi there",
-    user: "Amando",
+    user: "Amanda",
     added: new Date()
   },
   {
@@ -17,20 +18,26 @@ const message = [
   }
 ]
 
+app.set('view engine', 'pug');
+app.use(express.urlencoded({ extended: true }))
+
 app.get('/', (req, res) => {
-  res.writeHeader(200, { 'Content-Type': 'text/html' });
-  fs.readFile('./index.html', (error, html) => {
-    res.write(html);
-    res.end();
-  });
+  res.render('index', { title: 'Home', headerOne: 'Mini Message Board', messages: messages });
 });
 
 app.get('/new', (req, res) => {
-  res.writeHeader(200, { 'Content-Type': 'text/html' });
-  fs.readFile('./new.html', (error, html) => {
-    res.write(html);
-    res.end();
+  res.render('form', { title: 'New Message', headerOne: 'New Message' });
+});
+
+app.post('/new', (req, res) => {
+  console.log(req.body);
+  messages.push({ 
+    text: req.body.message,
+    user: req.body.user,
+    added: new Date()
   });
+
+  res.redirect('/');
 });
 
 app.listen(port, () => {
