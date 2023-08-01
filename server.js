@@ -17,19 +17,8 @@ const client = new MongoClient(uri, {
   }
 });
 
-const messages = [
-  {
-    text: "Hi there",
-    user: "Amanda",
-    added: new Date()
-  },
-  {
-    text: "Hello World",
-    user: "Charles",
-    added: new Date()
-  }
-];
-
+// Connect to db
+/*
 async function run() {
   await client.connect();
 
@@ -48,20 +37,36 @@ async function run() {
 }
 
 run().catch(console.log.dir);
-
-
+*/
 
 app.set('view engine', 'pug');
 app.use(express.urlencoded({ extended: true }))
 
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home', headerOne: 'Mini Message Board', messages: messages });
+// Read Messages
+app.get('/', async (req, res) => {
+  await client.connect();
+  const db = await client.db('miniMessageBoard');
+
+  const messagesCursor = await db.collection('messages').find();
+  const messages = [];
+
+  for await (const message of messagesCursor) {
+    messages.push({
+      text: message.text,
+      user: message.user,
+      added: message.added
+    });
+  }
+  
+  await res.render('index', { title: 'Home', headerOne: 'Mini Message Board', messages: messages });
 });
 
+// Form: Create Message
 app.get('/new', (req, res) => {
   res.render('form', { title: 'New Message', headerOne: 'New Message' });
 });
 
+// Create Message
 app.post('/new', async (req, res) => {
   const userData = { 
     text: req.body.message,
@@ -74,8 +79,7 @@ app.post('/new', async (req, res) => {
     if (err) throw err;
     console.log("1 message inserted");
     client.close();
-  })
-
+  });
   res.redirect('/');
 });
 
