@@ -1,6 +1,6 @@
 const express = require('express');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
 const port = 3000;
@@ -17,32 +17,11 @@ const client = new MongoClient(uri, {
   }
 });
 
-// Connect to db
-/*
-async function run() {
-  await client.connect();
-
-  const dbName = "miniMessageBoard";
-  const collectionName = "messages";
-
-  const database = client.db(dbName);
-  const collection = database.collection(collectionName);
-  try {
-    await collection.insertMany(messages);
-  } catch (err) {
-    console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
-  } finally {
-    await client.close();
-  }
-}
-
-run().catch(console.log.dir);
-*/
-
 app.set('view engine', 'pug');
 app.use(express.urlencoded({ extended: true }))
+app.use(express.static(__dirname));
 
-// Read Messages
+// Read All Messages
 app.get('/', async (req, res) => {
   await client.connect();
   const db = await client.db('miniMessageBoard');
@@ -52,16 +31,17 @@ app.get('/', async (req, res) => {
 
   for await (const message of messagesCursor) {
     messages.push({
+      uuid: message._id.toString(),
       text: message.text,
       user: message.user,
       added: message.added
     });
   }
-  
+  await client.close();
   await res.render('index', { title: 'Home', headerOne: 'Mini Message Board', messages: messages });
 });
 
-// Form: Create Message
+// GET form for new message 
 app.get('/new', (req, res) => {
   res.render('form', { title: 'New Message', headerOne: 'New Message' });
 });
@@ -81,6 +61,44 @@ app.post('/new', async (req, res) => {
     client.close();
   });
   res.redirect('/');
+});
+
+// Read Message Data, with _id = new ObjectId(:messageId)
+app.get('/messages/:messageId', async (req, res) => {
+  await client.connect();
+  const message = await client.db('miniMessageBoard').collection('messages').findOne({ _id: new ObjectId(req.params.messageId) });
+  
+  const messageData = {
+    id: req.params.messageId,
+    text: message.text,
+    user: message.user,
+  }
+
+  res.render('edit', { title: 'Edit Message', headerOne: 'Message', message: messageData });
+});
+
+// Update One Message, with _id = new ObjectId(:messageId)
+app.post('/messages/:messageId', async (req, res) => {
+  const updatedMessage = {
+    $set: {
+      text: req.body.message,
+      user: req.body.user
+    },
+  };
+
+  await client.connect();
+  await client.db('miniMessageBoard').collection('messages').updateOne({ _id: new ObjectId(req.params.messageId) }, updatedMessage);
+  await client.close();
+
+  res.redirect('/');
+});
+
+app.delete('/messages/:messageId', async (req, res) => {
+  await client.connect();
+  await client.db('miniMessageBoard').collection('messages').deleteOne({ _id: new ObjectId(req.params.messageId) });
+  await client.close();
+
+  res.json({ message: 'success' });
 });
 
 app.listen(port, () => {

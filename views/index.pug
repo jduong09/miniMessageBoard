@@ -6,11 +6,17 @@ html
       content= 'width=device-width, initial-scale=1.0'
       )
     title= title
+    link(rel= 'stylesheet' type= 'text/css' href= './css/styles.css')
+    script(type= 'text/javascript' src= './event.js')
   body
     h1= headerOne
     ul
       each message in messages
-        li
+        li(data-id= message.uuid class= 'li-message')
           h2= message.text
           div= message.user
           div= message.added
+          button(class= 'btn-edit' type= 'button')= 'Edit'
+          button(class= 'btn-delete' type= 'button')= 'Delete'
+    div
+      button(id= 'btn-new' type= 'button')= 'New Message'

@@ -9,9 +9,9 @@ html
     link(rel= 'stylesheet' type= 'text/css' href= './css/styles.css')
   body
     h1= headerOne
-    form(id= 'form-message-new' method= 'POST' action= '/new')
+    form(id= 'form-message-edit' method= 'POST' action= `/messages/${message.id}`)
       label(for= 'input-message')= 'Message: '
-        input(type= 'text' id= 'input-message' name='message' placeholder='Hello!')
+        input(type= 'text' id= 'input-message' name='message' value= message.text)
       label(for= 'input-user')= 'User: '
-        input(type= 'text' id= 'input-user' name='user' placeholder='Shakespeare')
-      input(type= 'submit' id= 'input-submit' value='Add Message')
+        input(type= 'text' id= 'input-user' name='user' value= message.user)
+      input(type= 'submit' id= 'input-submit' value='Edit Message')
